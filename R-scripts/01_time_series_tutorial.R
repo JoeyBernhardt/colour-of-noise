@@ -1,75 +1,11 @@
 
 
 
-#### time series
-
-
-
-library(zoo)
-HC4nh <- read.table("https://web.stanford.edu/class/earthsys214/data/HadCRUT.4.2.0.0.monthly_nh.txt",
-					header=FALSE)
-yr <- substr(HC4nh$V1,1,4)
-mo <- substr(HC4nh$V1,6,7)
-dates <- as.Date(paste(yr,mo,'01',sep="-"))
-
-## function to standardize (z-score)
-stand <- function(x) {
-	y <- (x - mean(x,na.rm=TRUE))/sd(x,na.rm=TRUE)
-	return(y)
-}
-
-# Create zoo object for satandardised anomalies:
-NH <- zoo(stand(HC4nh$V2),order.by=dates)
-plot(NH,main="",ylab="Standardized Temp (Z)",xlab="Year")
-
-
-acf(coredata(NH),lag.max = 240, main="Temperature is Highly Autocorrelated!")
-
-
-## a simple example
-
-y1 <- rep(c(1,0,0),80)
-y2 <- rep(c(0,0,0,2),60)
-y3 <- rep(c(0,0,0,0,0,5),40)
-y <- y1+y2+y3
-plot(0:240, c(0,y), type="h", xlab="Time", ylab="Value")
-
-
-I <- abs(fft(y))^2/240
-P <- (4/240)*I[1:120]
-f <- 0:119/240
-plot(f[-1],P[-1], type="l", xlab="Frequency", ylab="Power")
-
-
-require(zoo)
-meas <- read.table("https://web.stanford.edu/class/earthsys214/data/nycmeas.dat.txt", header=FALSE)
-dimnames(meas)[[2]] <- c("Date","Cases")
-meas1 <- zoo(meas$Cases, order.by=meas$Date)
-plot(meas1, xlab="Date", ylab="Cases")
-
-
-# what is the spans argument doing?
-# scalar argument
-kernel("modified.daniell",2)
-
-
-# vector argument
-kernel("modified.daniell",c(1,1))
-
-?spectrum
-mspect <- spectrum(meas$Cases, spans=c(2,2), plot=FALSE)
-delta <- 1/12
-specx <- mspect$freq/delta
-specy <- 2*mspect$spec
-plot(log(specx), log(mspect$spec), xlab="Period (years)", ylab="Spectral Density", type="l")
-
-
-
-
 library(tidyverse)
 library(cowplot)
 library(lubridate)
 theme_set(theme_cowplot())
+
 temps <- read_csv("data-raw/daily_temps_2000.csv") %>% 
 	filter(lat == -74.875, lon == 164.625)
 
